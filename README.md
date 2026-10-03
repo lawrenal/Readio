@@ -11,6 +11,9 @@ into a single audio episode — ready to listen to the next morning via a
 private podcast RSS feed, in any podcast app. Star anything you want to
 come back to for a longer, deeper Saturday episode.
 
+🔊 **[Listen to a sample episode](./sample/ReadioSample.m4a)** — real
+AI-narrated output, before you set anything up.
+
 ![Readio UI](./img/ReadioUI.png)
 
 ## Quick start (Docker, with the defaults)
