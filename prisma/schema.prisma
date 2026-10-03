@@ -1,0 +1,81 @@
+// Prisma schema for Link Podcast.
+// See README.md for the pipeline these models support.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum ItemType {
+  article
+  youtube
+}
+
+enum ItemStatus {
+  pending
+  extracted
+  needs_pdf
+  failed
+}
+
+model Item {
+  id        String     @id @default(cuid())
+  url       String     @unique // normalized form, used for dedup
+  rawUrl    String // exactly what the user submitted, pre-normalization
+  type      ItemType
+  status    ItemStatus @default(pending)
+  title     String? // set on successful extraction; falls back to rawUrl in scripts if absent
+
+  failureReason String? // e.g. "no_transcript", set when status = failed
+  rawText       String? // extracted article text
+  transcript    String? // extracted YouTube transcript
+  pdfPath       String? // path to an uploaded fallback PDF, if any
+
+  summary  String? // LLM-generated summary, set after extraction succeeds
+  keyFacts String? // JSON array of strings
+  tags     String? // JSON array of strings
+
+  starred Boolean @default(false)
+
+  episodeId String?
+  episode   Episode? @relation(fields: [episodeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum EpisodeType {
+  daily
+  weekly
+}
+
+// User-editable configuration (API keys, provider choice, scheduling),
+// set via the /settings page. A row here always overrides the matching
+// env var at that setting's name (see src/lib/settings.ts for the
+// registry + fallback precedence) — absence of a row means "use the env
+// var / built-in default instead," so existing .env-only deployments
+// keep working unchanged.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model Episode {
+  id          String      @id @default(cuid())
+  date        DateTime // the local calendar day (daily) or week-ending date (weekly) this episode covers
+  type        EpisodeType @default(daily)
+  script      String
+  summary     String? // short (<=3 sentence) teaser for the episode list; null if AI wasn't configured or the summarization call failed
+  audioPath   String
+  durationSec Int
+  notes       String? // e.g. "used template fallback, no AI key configured"
+
+  items Item[]
+
+  createdAt DateTime @default(now())
+}

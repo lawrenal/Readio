@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.readio.nightly</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__READIO_DIR__/scripts/nightly.sh</string>
+  </array>
+
+  <!-- 9:00 PM local time. If the Mac is asleep at that moment, launchd
+       runs it on next wake rather than skipping it outright — but if the
+       Mac stays asleep all evening, it just won't fire. Known limitation,
+       see TODO.md. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>21</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>__READIO_DIR__/data/logs/nightly-launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__READIO_DIR__/data/logs/nightly-launchd.err.log</string>
+</dict>
+</plist>

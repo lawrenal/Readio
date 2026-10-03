@@ -1,0 +1,49 @@
+services:
+  readio:
+    # Supports two paths with this one file:
+    #   docker compose up --build   → builds from source, using the Dockerfile below
+    #   docker compose up           → pulls the pre-built image from GHCR instead (no local build)
+    # Published automatically on every push to main — see
+    # .github/workflows/docker-publish.yml (image names are lowercased
+    # automatically for GHCR, hence "readio" not "Readio").
+    image: ghcr.io/lawrenal/readio:latest
+    build: .
+    container_name: readio
+    # Non-root by default so files written to the bind-mounted volume
+    # below are owned by a real host user, not root — override to match
+    # whatever user should own ./data on your host.
+    user: "${PUID:-1000}:${PGID:-1000}"
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Everything persistent lives here: the SQLite db, generated
+      # episode audio, uploaded PDF fallbacks, logs, and Kokoro's
+      # downloaded model — all under one bind mount so a container
+      # rebuild/restart never loses data. See human-eyes.md.
+      - ./data:/app/data
+    env_file:
+      # Secrets only (ANTHROPIC_API_KEY, and optionally a cloud TTS key
+      # if you override TTS_PROVIDER below) — copy .env.docker.example
+      # to .env and fill it in. Not committed; gitignored like the
+      # mac-native .env.
+      - .env
+    environment:
+      # Structural settings for this deployment, not secrets — kept here
+      # rather than in .env so a stray local .env (e.g. copied from the
+      # mac-native setup, which points DATABASE_URL somewhere entirely
+      # different) can't silently break the container.
+      - DATABASE_URL=file:/app/data/dev.db
+      - ENABLE_SCHEDULER=true
+      - TTS_PROVIDER=kokoro
+      # Containers default to UTC. This app's entire design is "local
+      # time, wherever the machine physically is" (the midnight cutoff
+      # for "today's content," the 9pm nightly trigger) — without this,
+      # both would silently run on UTC instead of your actual timezone.
+      - TZ=${TZ:-America/Los_Angeles}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3

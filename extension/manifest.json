@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Readio — Send to Podcast",
+  "version": "1.0.0",
+  "description": "Send the current tab to your Readio queue for tonight's episode.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["<all_urls>"]
+}

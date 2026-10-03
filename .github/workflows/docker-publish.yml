@@ -1,0 +1,67 @@
+name: Build and publish Docker image
+
+# Builds the image used by docker-compose.yml's `image:` reference
+# (ghcr.io/OWNER/readio) on every push to main, so `docker compose up`
+# (without --build) always has a current `latest` to pull instead of
+# requiring everyone to build from source locally.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required to push to GitHub Container Registry using GITHUB_TOKEN
+      # — no separate registry secret needed.
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (for arm64 builds on an amd64 runner)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Handles lowercasing the owner/repo (GHCR requires lowercase image
+      # names; GitHub usernames/orgs don't have to be lowercase) and
+      # generates both the `latest` and commit-SHA tags.
+      - name: Compute image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # GitHub Actions' own cache backend — keeps rebuilds fast
+          # (npm ci, native addon compilation for better-sqlite3/
+          # onnxruntime-node/sharp) without needing a separate registry
+          # or external cache service.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

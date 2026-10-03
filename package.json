@@ -1,0 +1,52 @@
+{
+  "name": "readio",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lawrenal/Readio.git"
+  },
+  "homepage": "https://github.com/lawrenal/Readio",
+  "bugs": {
+    "url": "https://github.com/lawrenal/Readio/issues"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "postinstall": "node scripts/copy-kokoro-voices.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "@huggingface/transformers": "^3.5.1",
+    "@mozilla/readability": "^0.6.0",
+    "@prisma/adapter-better-sqlite3": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "google-auth-library": "^11.1.0",
+    "jsdom": "^30.1.1",
+    "kokoro-js": "^1.2.1",
+    "next": "16.3.6",
+    "node-cron": "^4.6.0",
+    "pdf-parse": "^2.4.4",
+    "prisma": "^7.10.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "youtube-transcript": "^1.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.6.3",
+    "@types/node-cron": "^3.0.11",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.6",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^5.0.2"
+  }
+}

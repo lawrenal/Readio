@@ -1,0 +1,14 @@
+node_modules
+.next
+data
+prisma/dev.db
+prisma/dev.db-journal
+.env
+.env.local
+.git
+.gitignore
+*.md
+extension
+launchd
+.DS_Store
+npm-debug.log*
