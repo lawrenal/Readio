@@ -24,6 +24,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The Prisma client generates into a custom path (src/generated/prisma
+      # — see prisma/schema.prisma), which npm ci alone doesn't produce.
+      # Every local run of this suite has always had this directory already
+      # sitting on disk from a prior `npx prisma generate`/`npm run build`,
+      # which is exactly why this was missing here until CI actually ran
+      # against a truly fresh checkout and failed on it immediately.
+      - name: Generate Prisma client
+        run: npx prisma generate
+
       - name: Lint
         run: npm run lint
 
