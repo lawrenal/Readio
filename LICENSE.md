@@ -2,7 +2,7 @@
 
 <https://polyformproject.org/licenses/noncommercial/1.0.0>
 
-Required Notice: Copyright lawrenal (https://github.com/lawrenal)
+Required Notice: Copyright lawrenal (https://github.com/lawrenal/Readio)
 
 ## Acceptance
 
