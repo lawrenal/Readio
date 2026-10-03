@@ -1,12 +1,26 @@
 name: Build and publish Docker image
 
 # Builds the image used by docker-compose.yml's `image:` reference
-# (ghcr.io/OWNER/readio) on every push to main, so `docker compose up`
+# (ghcr.io/lawrenal/readio) on every push to main, so `docker compose up`
 # (without --build) always has a current `latest` to pull instead of
 # requiring everyone to build from source locally.
 on:
   push:
     branches: [main]
+    # Skip the (slow — multi-arch, no cache win for a content-only change)
+    # build entirely for commits that can't possibly change the image
+    # itself. The Docker build's own COPY layers would invalidate on any
+    # of these anyway (same build context), producing a byte-identical
+    # image at real CPU/time cost for nothing — this stops the workflow
+    # before any of that even starts.
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "img/**"
+      - "logo/**"
+      - "sample/**"
+      - "extension/**"
+      - "launchd/**"
   workflow_dispatch: {}
 
 env:
